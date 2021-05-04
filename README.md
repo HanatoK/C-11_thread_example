@@ -1,0 +1,3 @@
+# C++11 thread example code
+
+This is an example of using `std::thread` in C++11 for filling something into an array. I am still not sure if I use conditional variables and mutexes correctly, but the code works...
