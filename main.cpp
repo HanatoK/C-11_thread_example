@@ -82,7 +82,9 @@ public:
       const auto start = std::chrono::steady_clock::now();
       for (size_t i = 0; i < mConds.size(); ++i) {
         std::unique_lock<std::mutex> lk(mMutexes[i]);
-        mConds[i].wait(lk, [this, i]() { return mTaskStates[i] == 1; });
+        mConds[i].wait(lk, [this, i]() {
+          std::cout << "Wait for i = " << i << std::endl;
+          return mTaskStates[i] == 1; });
       }
       const auto end = std::chrono::steady_clock::now();
       double error = 0;
