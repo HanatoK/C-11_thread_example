@@ -32,7 +32,7 @@ ThreadPool::ThreadPool(size_t num_threads) {
     mThreads.push_back(
       std::thread(
         [this](){
-          while(!(this->mShutdown)) {
+          while(true) {
             std::function<void()> task;
             {
               std::unique_lock lock(this->mMutex);
@@ -53,8 +53,8 @@ ThreadPool::ThreadPool(size_t num_threads) {
 template<typename F, typename... Args>
 auto ThreadPool::addJob(F&& f, Args&&... args)
   -> std::future<decltype(f(args...))> {
-  std::function<decltype(f(args...))()> func = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
-  auto task_ptr = std::make_shared<std::packaged_task<decltype(f(args...))()>>(func);
+  auto task_ptr = std::make_shared<std::packaged_task<decltype(f(args...))()>>(
+    std::bind(std::forward<F>(f), std::forward<Args>(args)...));
   mTasks.push([task_ptr](){(*task_ptr)();});
   mCondVar.notify_one();
   return task_ptr->get_future();
@@ -76,7 +76,7 @@ std::uniform_int_distribution<int> dist(-2000, 2000);
 auto rnd = std::bind(dist, mt);
 
 void simulate_hard_computation() {
-  std::this_thread::sleep_for(std::chrono::milliseconds(2500 + rnd()));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100 + rnd()));
 }
 
 // Simple function that adds multiplies two numbers and prints the result
